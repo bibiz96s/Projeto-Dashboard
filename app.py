@@ -6,51 +6,41 @@ app = Dash(__name__)
 
 # assume you have a "long-form" data frame
 # see https://plotly.com/python/px-arguments/ for more options
-df = pd.read_excel("EvasãoSérieHistórica2024.xlsx")
+df = pd.read_csv("EvasãoSérieHistórica2024.csv", encoding='latin1',delimiter=';')
 
+opcoes = df.columns.tolist()
 #Criando o Grafico
-fig = px.bar(df, x="Ano", y="Vinculados", title="Dados sobre os alunos da Engenharia de Computacao")
-opcoes = [
-    "Ano",
-    "Vinculados",
-    "Formados",
-    "Ingressantes",
-    "Continuaram Vinculados no Proximo Ano",
-    "Evadidos p/Metodo",
-    "Evadidos Real",
-    "Taxa Evolução Vinculados",
-    "Porcentagem de Formados",
-    "Porcentagem de Ingressantes",
-    "Porcentagem Continuaram Vinculados",
-    "Porcentagem Evadidos",
-    "Porcentagem Evasao"
-]
+#fig = px.bar(df, x="Ano", y="Vinculados", title="Dados sobre os alunos da Engenharia de Computacao")
 
 
 app.layout = html.Div(children=[
     html.H1(children='Dados sobre os alunos da Engenharia de Computação'),
 
 
-    dcc.Dropdown(opcoes, value= 'Ano', id='x'),
+    dcc.Dropdown(opcoes, value= ['Ingressantes'], id='color',multi=True),
     dcc.Dropdown(opcoes, value= 'Vinculados', id='y'),
     
     dcc.Graph(
-        id='grafico-ecomp',
-        figure=fig
+        id='grafico-ecomp'
     )
 ])
 
 
 @callback(
     Output('grafico-ecomp', 'figure'),
-    Input('x', 'value'),
+    Input('color', 'value'),
     Input('y', 'value')
 )
-def update_output(value_x,value_y):
+def update_output(value_color,value_y):
 
-    fig = px.bar(df, x=value_x, y=value_y, title="Dados sobre os alunos da Engenharia de Computacao")
-    return fig
     
+    fig = px.bar()
+
+    for coluna in value_color:
+        print(coluna)
+        fig.add_trace(px.bar(df, x="Ano", y=value_y,color=coluna, title=f"Dados sobre {coluna} e {value_y}").data[0],)
+
+    return fig
 
 
 if __name__ == '__main__':
